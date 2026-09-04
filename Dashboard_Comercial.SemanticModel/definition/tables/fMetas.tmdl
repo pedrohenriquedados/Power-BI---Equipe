@@ -1,0 +1,68 @@
+table fMetas
+	lineageTag: 35dad75b-303a-47c6-8811-189c845acd21
+
+	column Categoria
+		dataType: string
+		isHidden
+		lineageTag: 30ab9dae-34f0-44c2-a27c-ef3d6af20027
+		summarizeBy: none
+		sourceColumn: Categoria
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Continente
+		dataType: string
+		isHidden
+		lineageTag: 76423d55-a02c-4a38-9d46-b6ccf042b5ea
+		summarizeBy: none
+		sourceColumn: Continente
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column ValorMeta
+		dataType: double
+		lineageTag: f1a278ac-a388-4960-96f1-e0d562c13ee5
+		summarizeBy: sum
+		sourceColumn: ValorMeta
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DataMeta
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		lineageTag: d291fb90-ce3e-46f2-aa5d-e7107d96f8fb
+		summarizeBy: none
+		sourceColumn: DataMeta
+
+		changedProperty = IsHidden
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition fMetas-743f55c9-23e7-40c0-94ff-bd25e7c38776 = m
+		mode: import
+		queryGroup: Fatos
+		source =
+				let
+				    Fonte = Table.Combine({#"fMeta 2017", #"fMetas 2018 e 2019"})
+				in
+				    Fonte
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

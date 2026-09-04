@@ -1,0 +1,46 @@
+table Cliente-Sup
+	isHidden
+	lineageTag: 4d2b552c-4547-467c-80c7-a9770e828270
+
+	column 'ID Cliente'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 83260a33-24f0-4e02-8d5a-bbfed7b05910
+		summarizeBy: none
+		sourceColumn: ID Cliente
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Supervisor'
+		dataType: string
+		isHidden
+		lineageTag: 2aab1187-eed8-4853-96a7-e466aae37bd1
+		summarizeBy: none
+		sourceColumn: ID Supervisor
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	partition Cliente-Sup-be5ebf26-9a34-4e62-8c86-782a7740fd32 = m
+		mode: import
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M4. Modelagem de Dados\Relacionamento M-M entre Dimensoes\Cliente-Supervisor.xlsx"), null, true),
+				    #"Cliente-Sup_Sheet" = Fonte{[Item="Cliente-Sup",Kind="Sheet"]}[Data],
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Cliente-Sup_Sheet", [PromoteAllScalars=true]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Cabeçalhos Promovidos",{{"ID Cliente", Int64.Type}, {"ID Supervisor", type text}})
+				in
+				    #"Tipo Alterado"
+
+	changedProperty = IsHidden
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navegação
+

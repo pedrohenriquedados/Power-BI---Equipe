@@ -1,0 +1,168 @@
+table dCliente
+	lineageTag: c05f6039-2040-415b-81ca-7dc186f20e90
+
+	column 'ID Cliente'
+		dataType: int64
+		formatString: 0
+		lineageTag: c3c1f6c4-042e-4105-bb0c-131c01d64336
+		summarizeBy: none
+		sourceColumn: ID Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Cidade'
+		dataType: int64
+		formatString: 0
+		lineageTag: 8e927117-3842-4b8e-806f-cbabf5fd6946
+		summarizeBy: sum
+		sourceColumn: ID Cidade
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Data Nascimento'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 56596e24-58de-405a-bcf6-1fbbdc3cb4b8
+		summarizeBy: none
+		sourceColumn: Data Nascimento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Estado Civil'
+		dataType: string
+		lineageTag: a3b2b2f7-33a6-4dda-bcfe-7aa1dfa3bde2
+		summarizeBy: none
+		sourceColumn: Estado Civil
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Gênero
+		dataType: string
+		lineageTag: 3a95ffbc-6911-4dee-a343-d499cbe0b840
+		summarizeBy: none
+		sourceColumn: Gênero
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Educação
+		dataType: string
+		lineageTag: fcef049a-b0b9-422b-bd86-355046400d33
+		summarizeBy: none
+		sourceColumn: Educação
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Ocupação
+		dataType: string
+		lineageTag: 46bd8add-90bb-4408-8ca9-fdfcca909675
+		summarizeBy: none
+		sourceColumn: Ocupação
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column 'Tipo Cliente'
+		dataType: string
+		lineageTag: e388cb44-76a6-4b32-a6e4-55b0ad77681c
+		summarizeBy: none
+		sourceColumn: Tipo Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Nome
+		dataType: string
+		lineageTag: 7001d0d6-a07f-4529-a2d6-4c8344f964a7
+		summarizeBy: none
+		sourceColumn: Nome
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Idade
+		dataType: int64
+		formatString: 0
+		lineageTag: d3ffa85e-ee2c-4352-910f-78efa84c4de4
+		summarizeBy: sum
+		sourceColumn: Idade
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cidade
+		dataType: string
+		lineageTag: af3ca864-658f-434b-bfe1-08399b410e7b
+		summarizeBy: none
+		sourceColumn: Cidade
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Estado
+		dataType: string
+		lineageTag: 65ec9d13-faab-4374-9715-d46edd9a6aae
+		summarizeBy: none
+		sourceColumn: Estado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column País
+		dataType: string
+		lineageTag: 95c6fbc2-7b7d-4919-9e86-8c84c52524a6
+		summarizeBy: none
+		sourceColumn: País
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Continente
+		dataType: string
+		lineageTag: 59df828e-80d7-4a43-b758-54ac022e6f8e
+		summarizeBy: none
+		sourceColumn: Continente
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	partition dCliente-116f807b-97d5-4396-a049-a3f015b17807 = m
+		mode: import
+		queryGroup: Dimensões
+		source =
+				let
+				    Fonte = BaseDados,
+				    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Cliente xlsx" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Dimensoes\",Name="Cliente.xlsx"]}[Content],
+				    #"Pasta de Trabalho Importada do Excel" = Excel.Workbook(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Cliente xlsx"),
+				    Cliente_Sheet = #"Pasta de Trabalho Importada do Excel"{[Item="Cliente",Kind="Sheet"]}[Data],
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(Cliente_Sheet, [PromoteAllScalars=true]),
+				    #"Valor Substituído" = Table.ReplaceValue(#"Cabeçalhos Promovidos","'","",Replacer.ReplaceText,{"Data Nascimento"}),
+				    #"Tipo Alterado com Localidade" = Table.TransformColumnTypes(#"Valor Substituído", {{"Data Nascimento", type date}}, "en-US"),
+				    #"Erros Substituídos" = Table.ReplaceErrorValues(#"Tipo Alterado com Localidade", {{"Data Nascimento", null}}),
+				    #"Personalização Adicionada" = Table.AddColumn(#"Erros Substituídos", "Nome", each if [Tipo Cliente] = "Person" then [Primeiro Nome] & " " &[Sobrenome] else [Nome Empresa]),
+				    #"Colunas Removidas" = Table.RemoveColumns(#"Personalização Adicionada",{"Primeiro Nome", "Sobrenome", "Nome Empresa", "Email"}),
+				    #"Idade Inserida" = Table.AddColumn(#"Colunas Removidas", "Idade", each Date.From(DateTime.LocalNow()) - [Data Nascimento], type duration),
+				    #"Total de Anos Calculado" = Table.TransformColumns(#"Idade Inserida",{{"Idade", each Duration.TotalDays(_) / 365, type number}}),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Total de Anos Calculado",{{"ID Cliente", Int64.Type}, {"ID Cidade", Int64.Type}, {"Data Nascimento", type date}, {"Estado Civil", type text}, {"Gênero", type text}, {"Educação", type text}, {"Ocupação", type text}, {"Tipo Cliente", type text}, {"Nome", type text}, {"Idade", Int64.Type}}),
+				    #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado", {"ID Cidade"}, dLocalizacao, {"ID Localização"}, "dLocalizacao", JoinKind.LeftOuter),
+				    #"dLocalizacao Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "dLocalizacao", {"Cidade", "Estado", "País", "Continente"}, {"Cidade", "Estado", "País", "Continente"})
+				in
+				    #"dLocalizacao Expandido"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

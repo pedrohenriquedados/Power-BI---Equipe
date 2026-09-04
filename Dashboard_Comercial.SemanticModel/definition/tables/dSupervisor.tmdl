@@ -1,0 +1,50 @@
+table dSupervisor
+	lineageTag: c1cb27cc-3856-4d58-ab34-39ffd5dfb51b
+
+	column idSupervisor
+		dataType: string
+		lineageTag: c1e244d1-09ec-4413-b9d0-9be15029ca5f
+		summarizeBy: none
+		sourceColumn: idSupervisor
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Nome
+		dataType: string
+		lineageTag: 02444365-2e4e-43c8-8df8-5e9838a107c4
+		summarizeBy: none
+		sourceColumn: Nome
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Email
+		dataType: string
+		lineageTag: 559f6f88-864d-44e6-8f21-8754786caa6c
+		summarizeBy: none
+		sourceColumn: Email
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	partition dSupervisor-10c7c78f-9d8f-4fcb-8c6d-20ac4b676106 = m
+		mode: import
+		queryGroup: Dimensões
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M4. Modelagem de Dados\Relacionamento M-M entre Dimensoes\Cliente-Supervisor.xlsx"), null, true),
+				    dSupervisor_Sheet = Fonte{[Item="dSupervisor",Kind="Sheet"]}[Data],
+				    #"Tipo Alterado" = Table.TransformColumnTypes(dSupervisor_Sheet,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}}),
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Tipo Alterado", [PromoteAllScalars=true]),
+				    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Cabeçalhos Promovidos",{{"idSupervisor", type text}, {"Nome", type text}, {"Email", type text}})
+				in
+				    #"Tipo Alterado1"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

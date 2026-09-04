@@ -1,0 +1,89 @@
+table dProduto
+	lineageTag: 9a966c80-3277-4acc-a772-a16c859fd917
+
+	column Produto
+		dataType: string
+		lineageTag: 1e2ba850-8bce-444c-bf8d-d252220e0870
+		summarizeBy: none
+		sourceColumn: Produto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column idSubcategoria
+		dataType: int64
+		formatString: 0
+		lineageTag: 4a309e12-02c1-452b-83f0-5dedf64a2ffd
+		summarizeBy: sum
+		sourceColumn: idSubcategoria
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subcategoria
+		dataType: string
+		lineageTag: 7de21260-fa32-4e13-b63b-09ce47381f56
+		summarizeBy: none
+		sourceColumn: Subcategoria
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Marca
+		dataType: string
+		lineageTag: ad575f29-29aa-497b-9cd3-86e2aee168b0
+		summarizeBy: none
+		sourceColumn: Marca
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column idProduto
+		dataType: int64
+		formatString: 0
+		lineageTag: 38ca94ff-3b7f-4f73-b392-82be89308164
+		summarizeBy: none
+		sourceColumn: idProduto
+
+		annotation SummarizationSetBy = Automatic
+
+	column Categoria
+		dataType: string
+		lineageTag: 9635ed87-b599-47dc-bf45-03c3aee53151
+		summarizeBy: none
+		sourceColumn: Categoria
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	partition dProduto-aa7e3c95-e14a-4cf1-86d0-d687d1c8a293 = m
+		mode: import
+		queryGroup: Dimensões
+		source =
+				let
+				    Fonte = BaseDados,
+				    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Produto csv" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Dimensoes\",Name="Produto.csv"]}[Content],
+				    #"CSV Importado" = Csv.Document(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Produto csv",[Delimiter=";", Columns=2, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Linhas Filtradas" = Table.SelectRows(#"CSV Importado", each [Column2] <> null and [Column2] <> ""),
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Linhas Filtradas", [PromoteAllScalars=true]),
+				    #"Coluna Condicional Adicionada" = Table.AddColumn(#"Cabeçalhos Promovidos", "Marca", each if Text.Contains([Produto], "Marca:") then [Subcategoria] else null),
+				    #"Preenchido Abaixo" = Table.FillDown(#"Coluna Condicional Adicionada",{"Marca"}),
+				    #"Linhas Filtradas1" = Table.SelectRows(#"Preenchido Abaixo", each ([Produto] <> "Marca:")),
+				    #"Texto Inserido Entre os Delimitadores" = Table.AddColumn(#"Linhas Filtradas1", "idProduto", each Text.BetweenDelimiters([Produto], " ", " ", 1, 0), type text),
+				    #"Texto Extraído Após o Delimitador" = Table.TransformColumns(#"Texto Inserido Entre os Delimitadores", {{"Produto", each Text.AfterDelimiter(_, "- "), type text}}),
+				    #"Dividir Coluna por Delimitador" = Table.SplitColumn(#"Texto Extraído Após o Delimitador", "Subcategoria", Splitter.SplitTextByDelimiter(" - ", QuoteStyle.Csv), {"Subcategoria.1", "Subcategoria.2"}),
+				    #"Texto Extraído Após o Delimitador1" = Table.TransformColumns(#"Dividir Coluna por Delimitador", {{"Subcategoria.1", each Text.AfterDelimiter(_, "# "), type text}}),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"Texto Extraído Após o Delimitador1",{{"Subcategoria.1", "idSubcategoria"}, {"Subcategoria.2", "Subcategoria"}}),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Colunas Renomeadas",{{"Produto", type text}, {"idSubcategoria", Int64.Type}, {"Subcategoria", type text}, {"Marca", type text}, {"idProduto", Int64.Type}}),
+				    #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado", {"idSubcategoria"}, dSubcategoria, {"idSubcategoria"}, "dSubcategoria", JoinKind.LeftOuter),
+				    #"dSubcategoria Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "dSubcategoria", {"Categoria"}, {"Categoria"})
+				in
+				    #"dSubcategoria Expandido"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

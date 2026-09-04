@@ -1,0 +1,148 @@
+expression 'fMeta 2017' =
+		let
+		    Fonte = BaseDados,
+		    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Meta 2017 csv" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Fatos\",Name="Meta 2017.csv"]}[Content],
+		    #"CSV Importado" = Csv.Document(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Meta 2017 csv",[Delimiter=";", Columns=5, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    LinhasFiltradas = Table.SelectRows(#"CSV Importado", each [Column2] <> null and [Column2] <> ""),
+		    CabeçalhosPromovidos = Table.PromoteHeaders(LinhasFiltradas, [PromoteAllScalars=true]),
+		    ColunasNãoDinâmicas = Table.UnpivotOtherColumns(CabeçalhosPromovidos, {"Categoria", "Data Revisão"}, "Continente", "ValorMeta"),
+		    // Foram agrupadas as colunas Categoria e Continente
+		    LinhasAgrupadas = Table.Group(ColunasNãoDinâmicas, {"Categoria", "Continente"}, {{"Tabela", each _, type table [Categoria=nullable text, Data Revisão=nullable date, Continente=nullable text, ValorMeta=nullable number]}}),
+		    PersonalizaçãoAdicionada = Table.AddColumn(LinhasAgrupadas, "ValorFinal", each Table.Max([Tabela], "Data Revisão")),
+		    OutrasColunasRemovidas = Table.SelectColumns(PersonalizaçãoAdicionada,{"ValorFinal"}),
+		    ValorFinalExpandido = Table.ExpandRecordColumn(OutrasColunasRemovidas, "ValorFinal", {"Categoria", "Continente", "ValorMeta"}, {"Categoria", "Continente", "ValorMeta"}),
+		    PersonalizaçãoAdicionada1 = Table.AddColumn(ValorFinalExpandido, "DataMeta", each #date(2017, 01, 01)),
+		    TipoAlterado = Table.TransformColumnTypes(PersonalizaçãoAdicionada1,{{"Categoria", type text}, {"Continente", type text}, {"ValorMeta", Currency.Type}, {"DataMeta", type date}})
+		in
+		    TipoAlterado
+	lineageTag: 4c15cb01-001b-4b5e-a8f6-f4890b77bea9
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression 'fMetas 2018 e 2019' =
+		let
+		    Fonte = BaseDados,
+		    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Meta 2018 e 2019 xlsx" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Fatos\",Name="Meta 2018 e 2019.xlsx"]}[Content],
+		    #"Pasta de Trabalho Importada do Excel" = Excel.Workbook(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Meta 2018 e 2019 xlsx"),
+		    #"Metas 2018 e 2019_Sheet" = #"Pasta de Trabalho Importada do Excel"{[Item="Metas 2018 e 2019",Kind="Sheet"]}[Data],
+		    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Metas 2018 e 2019_Sheet", [PromoteAllScalars=true]),
+		    #"Linhas Filtradas" = Table.SelectRows(#"Cabeçalhos Promovidos", each ([Column2] <> null and [Column2] <> "") and ([Metas 2018 e 2019] <> "Total")),
+		    #"Colunas Removidas" = Table.RemoveColumns(#"Linhas Filtradas",{"Column5", "Column9"}),
+		    #"Tabela Transposta" = Table.Transpose(#"Colunas Removidas"),
+		    #"Cabeçalhos Promovidos1" = Table.PromoteHeaders(#"Tabela Transposta", [PromoteAllScalars=true]),
+		    #"Preenchido Abaixo" = Table.FillDown(#"Cabeçalhos Promovidos1",{"Column1"}),
+		    #"Colunas Não Dinâmicas" = Table.UnpivotOtherColumns(#"Preenchido Abaixo", {"Column1", "Column2"}, "Atributo", "Valor"),
+		    #"Valor Substituído" = Table.ReplaceValue(#"Colunas Não Dinâmicas","Ano 20","",Replacer.ReplaceText,{"Column1"}),
+		    #"Prefixo Adicionado" = Table.TransformColumns(#"Valor Substituído", {{"Column1", each "01/01/" & _, type text}}),
+		    #"Colunas Renomeadas" = Table.RenameColumns(#"Prefixo Adicionado",{{"Column1", "DataMeta"}, {"Column2", "Continente"}, {"Atributo", "Categoria"}, {"Valor", "ValorMeta"}}),
+		    #"Tipo Alterado" = Table.TransformColumnTypes(#"Colunas Renomeadas",{{"DataMeta", type date}, {"Continente", type text}, {"Categoria", type text}, {"ValorMeta", type number}})
+		in
+		    #"Tipo Alterado"
+	lineageTag: 1492ce26-f488-43fc-976c-67d916d5ecfd
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression dSubcategoria =
+		let
+		    Fonte = BaseDados,
+		    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Subcategoria json" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Dimensoes\",Name="Subcategoria.json"]}[Content],
+		    #"JSON Importado" = Json.Document(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Subcategoria json",1252),
+		    #"Convertido para Tabela" = Table.FromList(#"JSON Importado", Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Column1 Expandido" = Table.ExpandRecordColumn(#"Convertido para Tabela", "Column1", {"idSubcategoria", "Subcategoria", "Categoria"}, {"idSubcategoria", "Subcategoria", "Categoria"}),
+		    #"Tipo Alterado" = Table.TransformColumnTypes(#"Column1 Expandido",{{"idSubcategoria", Int64.Type}, {"Subcategoria", type text}, {"Categoria", type text}})
+		in
+		    #"Tipo Alterado"
+	lineageTag: 59149af7-4f69-438e-b6d3-830ba60aaa16
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression dLocalizacao =
+		let
+		    Fonte = BaseDados,
+		    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Localização csv" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Dimensoes\",Name="Localizacao.csv"]}[Content],
+		    #"CSV Importado" = Csv.Document(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Dimensões\_Localização csv",[Delimiter=";", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Linhas Filtradas" = Table.SelectRows(#"CSV Importado", each [Column2] <> null and [Column2] <> ""),
+		    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Linhas Filtradas", [PromoteAllScalars=true]),
+		    #"Coluna Condicional Adicionada" = Table.AddColumn(#"Cabeçalhos Promovidos", "Continente", each if Text.Contains([ID Localização], "Continente:") then [Tipo Localização] else null),
+		    #"Preenchido Abaixo" = Table.FillDown(#"Coluna Condicional Adicionada",{"Continente"}),
+		    #"Linhas Filtradas1" = Table.SelectRows(#"Preenchido Abaixo", each ([ID Localização] <> "Continente:")),
+		    #"Tipo Alterado" = Table.TransformColumnTypes(#"Linhas Filtradas1",{{"ID Localização", Int64.Type}, {"Tipo Localização", type text}, {"Cidade", type text}, {"Estado", type text}, {"País", type text}, {"Continente", type text}})
+		in
+		    #"Tipo Alterado"
+	lineageTag: 0034c367-2b5b-415f-8df4-02a5a6d072da
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression fxFeriados =
+		let
+		    Fonte = (AnoFeriado as text) => let
+		        Fonte = Web.BrowserContents("https://www.anbima.com.br/feriados/fer_nacionais/" & AnoFeriado & ".asp"),
+		        #"Tabela extraída de HTML" = Html.Table(Fonte, {{"Column1", "TABLE.interna > * > TR > :nth-child(1)"}, {"Column2", "TABLE.interna > * > TR > :nth-child(2)"}, {"Column3", "TABLE.interna > * > TR > :nth-child(3)"}}, [RowSelector="TABLE.interna > * > TR"]),
+		        #"Cabeçalhos Promovidos" = Table.PromoteHeaders(#"Tabela extraída de HTML", [PromoteAllScalars=true]),
+		        #"Tipo Alterado" = Table.TransformColumnTypes(#"Cabeçalhos Promovidos",{{"Data", type date}, {"Dia da Semana", type text}, {"Feriado", type text}})
+		    in
+		        #"Tipo Alterado"
+		in
+		    Fonte
+	lineageTag: a7497199-ccd8-4a80-974c-0bc316ab467a
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Function
+
+expression BaseDados =
+		let
+		    Fonte = Folder.Files(CaminhoPasta)
+		in
+		    Fonte
+	lineageTag: f2518acf-4675-43e3-9504-966520c55b02
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression CaminhoPasta = "W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: b83aa74d-55fe-4d2d-954f-72f627e8f6bd
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Text
+
+expression dFeriado =
+		let
+		    Anos = {2017..2019},
+		    #"Convertido para Tabela" = Table.FromList(Anos, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+		    #"Colunas Renomeadas" = Table.RenameColumns(#"Convertido para Tabela",{{"Column1", "Ano"}}),
+		    #"Tipo Alterado" = Table.TransformColumnTypes(#"Colunas Renomeadas",{{"Ano", type text}}),
+		    #"Função Personalizada Invocada" = Table.AddColumn(#"Tipo Alterado", "Feriado", each fxFeriados([Ano])),
+		    #"Outras Colunas Removidas" = Table.SelectColumns(#"Função Personalizada Invocada",{"Feriado"}),
+		    #"Feriado Expandido" = Table.ExpandTableColumn(#"Outras Colunas Removidas", "Feriado", {"Data", "Dia da Semana", "Feriado"}, {"Data", "Dia da Semana", "Feriado.1"}),
+		    #"Colunas Renomeadas1" = Table.RenameColumns(#"Feriado Expandido",{{"Feriado.1", "Feriado"}}),
+		    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Colunas Renomeadas1",{{"Data", type date}, {"Dia da Semana", type text}, {"Feriado", type text}})
+		in
+		    #"Tipo Alterado1"
+	lineageTag: 3a2acfe5-8246-4c0e-bf33-81678a71bf24
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
+expression 'Medidas Gerais' =
+		let
+		    Fonte = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [#"Coluna 1" = _t]),
+		    #"Tipo Alterado" = Table.TransformColumnTypes(Fonte,{{"Coluna 1", type text}}),
+		    #"Colunas Removidas" = Table.RemoveColumns(#"Tipo Alterado",{"Coluna 1"})
+		in
+		    #"Colunas Removidas"
+	lineageTag: a8c37432-04ee-4973-9602-ed5206c709a5
+
+	annotation PBI_ResultType = Table
+

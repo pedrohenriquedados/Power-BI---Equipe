@@ -1,0 +1,34 @@
+table Continente
+	isHidden
+	lineageTag: 4ecc939a-ad32-4b36-ab62-0c3d351a2412
+
+	column Continente
+		dataType: string
+		isHidden
+		lineageTag: 9af985ae-94ed-428a-a84a-0de05fbbdaf6
+		summarizeBy: none
+		sourceColumn: Continente
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	partition Continente-3adc557a-250c-4aed-ba29-a39523662f24 = m
+		mode: import
+		queryGroup: Dimensões
+		source =
+				let
+				    Fonte = dCliente,
+				    #"Outras Colunas Removidas" = Table.SelectColumns(Fonte,{"Continente"}),
+				    #"Duplicatas Removidas" = Table.Distinct(#"Outras Colunas Removidas")
+				in
+				    #"Duplicatas Removidas"
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

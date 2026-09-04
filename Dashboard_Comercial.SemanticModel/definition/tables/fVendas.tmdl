@@ -1,0 +1,143 @@
+table fVendas
+	lineageTag: 3ed58bab-5347-4448-aa4f-87bdc345512a
+
+	measure 'Possui Vendas' = INT ( NOT ISEMPTY(fVendas) )
+		formatString: 0
+		lineageTag: 60090bbb-4d93-44cd-9b51-7dd5a20891cd
+
+	column 'Data Venda'
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 0836fa81-766b-4208-b548-a1c26d0068ff
+		summarizeBy: none
+		sourceColumn: Data Venda
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Data Envio'
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1f2fd906-899e-4bea-b471-1d076bc1c2cc
+		summarizeBy: none
+		sourceColumn: Data Envio
+
+		changedProperty = FormatString
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'ID Produto'
+		dataType: int64
+		formatString: 0
+		lineageTag: 18930904-631a-4fae-ae2b-11936ca0a6f4
+		summarizeBy: none
+		sourceColumn: ID Produto
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Cliente'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5479a978-b447-4198-a371-8d9bc1d28075
+		summarizeBy: none
+		sourceColumn: ID Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'No. Venda'
+		dataType: string
+		lineageTag: 0950c4ec-e2d6-4d62-ba75-22c2cb6eb896
+		summarizeBy: none
+		sourceColumn: No. Venda
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column 'Custo Unitário'
+		dataType: double
+		lineageTag: 08373581-97b5-487f-988e-4a567162da8b
+		summarizeBy: sum
+		sourceColumn: Custo Unitário
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Preço Unitário'
+		dataType: double
+		lineageTag: 1cb87bde-a58d-4ed3-a929-af92a5df2c54
+		summarizeBy: sum
+		sourceColumn: Preço Unitário
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantidade
+		dataType: int64
+		formatString: 0
+		lineageTag: c81cbda4-07d2-4561-8b0f-5d9c7ca56581
+		summarizeBy: sum
+		sourceColumn: Quantidade
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Valor Desconto'
+		dataType: double
+		lineageTag: b60669ad-95a1-4e0a-a1a7-06a4aa441f50
+		summarizeBy: sum
+		sourceColumn: Valor Desconto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Custo Venda'
+		dataType: double
+		lineageTag: aaf3c8e8-fefb-44d7-9ca5-e726d846ad06
+		summarizeBy: sum
+		sourceColumn: Custo Venda
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Valor Venda'
+		dataType: double
+		lineageTag: 51ceaca9-3fa9-4ac4-9f21-ba4a5f0dc2ff
+		summarizeBy: sum
+		sourceColumn: Valor Venda
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fVendas-bd7f8ef3-cd5e-4ab0-bc78-3016c7756655 = m
+		mode: import
+		queryGroup: Fatos
+		source =
+				let
+				    Fonte = BaseDados,
+				    #"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Vendas xlsx" = Fonte{[#"Folder Path"="W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3.0\M2. Power Query e Linguagem M\BaseDadosPrincipal\Fatos\",Name="Vendas.xlsx"]}[Content],
+				    #"Pasta de Trabalho Importada do Excel" = Excel.Workbook(#"W:\OneDrive - Aprenda Power BI\Cursos Online\_Arquivos\TrilhaChampion_v3 0\M2  Power Query e Linguagem M\BaseDadosPrincipal\Fatos\_Vendas xlsx"),
+				    Vendas_Sheet = #"Pasta de Trabalho Importada do Excel"{[Item="Vendas",Kind="Sheet"]}[Data],
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(Vendas_Sheet, [PromoteAllScalars=true]),
+				    #"Linhas Principais Removidas" = Table.Skip(#"Cabeçalhos Promovidos",3),
+				    #"Cabeçalhos Promovidos1" = Table.PromoteHeaders(#"Linhas Principais Removidas", [PromoteAllScalars=true]),
+				    #"Multiplicação Inserida" = Table.AddColumn(#"Cabeçalhos Promovidos1", "Custo Venda", each [Quantidade] * [Custo Unitário], type number),
+				    #"Personalização Adicionada" = Table.AddColumn(#"Multiplicação Inserida", "Valor Venda", each [Quantidade] * [Preço Unitário] - [Valor Desconto]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Personalização Adicionada",{{"Data Venda", type date}, {"Data Envio", type date}, {"ID Produto", Int64.Type}, {"ID Subcategoria", Int64.Type}, {"ID Cliente", Int64.Type}, {"ID Cidade", Int64.Type}, {"No. Venda", type text}, {"Custo Unitário", type number}, {"Preço Unitário", type number}, {"Quantidade", Int64.Type}, {"Valor Desconto", type number}, {"Custo Venda", type number}, {"Valor Venda", type number}}),
+				    #"Colunas Removidas" = Table.RemoveColumns(#"Tipo Alterado",{"ID Subcategoria", "ID Cidade"})
+				in
+				    #"Colunas Removidas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,45 @@
+relationship 6aeafbf3-3cc6-41fe-8bd7-90d86b64dce9
+	fromColumn: fVendas.'ID Produto'
+	toColumn: dProduto.idProduto
+
+relationship d1d1c852-4e02-4cd4-a15d-5579a8a31c32
+	fromColumn: fVendas.'ID Cliente'
+	toColumn: dCliente.'ID Cliente'
+
+relationship 28f1acdf-d210-4a5e-9ca9-8da5d7ae6d3f
+	fromColumn: fVendas.'Data Venda'
+	toColumn: dCalendario.Data
+
+relationship aff1225b-6225-453e-9509-9ef60cc10f5b
+	isActive: false
+	fromColumn: fVendas.'Data Envio'
+	toColumn: dCalendario.Data
+
+relationship 8fed4da4-8887-486f-85e8-1057cd0e82d7
+	fromColumn: fMetas.DataMeta
+	toColumn: dCalendario.Data
+
+relationship 51cfe650-b7a5-4d70-940b-4694899f9e42
+	toCardinality: many
+	fromColumn: fMetas.Categoria
+	toColumn: dProduto.Categoria
+
+relationship 40ca29e3-1323-4aa3-b03e-694b35c2eee2
+	fromColumn: fMetas.Continente
+	toColumn: Continente.Continente
+
+relationship 6ab34762-f792-4c48-994c-781a47e325b3
+	crossFilteringBehavior: bothDirections
+	fromColumn: dCliente.Continente
+	toColumn: Continente.Continente
+
+relationship 35c69846-a9dd-47bc-b8f8-557dadf3a412
+	crossFilteringBehavior: bothDirections
+	securityFilteringBehavior: bothDirections
+	fromColumn: Cliente-Sup.'ID Cliente'
+	toColumn: dCliente.'ID Cliente'
+
+relationship b8903044-687b-460e-b287-f22ddfa3be35
+	fromColumn: Cliente-Sup.'ID Supervisor'
+	toColumn: dSupervisor.idSupervisor
+

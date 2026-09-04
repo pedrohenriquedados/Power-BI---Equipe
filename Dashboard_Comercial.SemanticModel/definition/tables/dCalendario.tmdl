@@ -1,0 +1,204 @@
+table dCalendario
+	lineageTag: 1a8402c2-59bb-43f1-9255-380a36622831
+	dataCategory: Time
+
+	column Data
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 52ebdc00-a8cd-449f-bf3e-2114b6cc6fa5
+		summarizeBy: none
+		sourceColumn: Data
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Ano
+		dataType: int64
+		formatString: 0
+		lineageTag: 478c7799-5c5d-401a-a00b-f4df50b4b77e
+		summarizeBy: sum
+		sourceColumn: Ano
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mês
+		dataType: int64
+		formatString: 0
+		lineageTag: 08c60d76-70f7-45fa-ad92-8c2444d95c2b
+		summarizeBy: sum
+		sourceColumn: Mês
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nome do Mês'
+		dataType: string
+		lineageTag: 419b8c6d-5efe-4151-a697-c8b7de083538
+		summarizeBy: none
+		sourceColumn: Nome do Mês
+		sortByColumn: Mês
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Dia
+		dataType: int64
+		formatString: 0
+		lineageTag: 39165fe5-0cbc-4dea-bf28-2eecd842c4fd
+		summarizeBy: sum
+		sourceColumn: Dia
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dia da Semana'
+		dataType: int64
+		formatString: 0
+		lineageTag: 120f4eae-7528-408c-81d9-b000bae7d5c9
+		summarizeBy: sum
+		sourceColumn: Dia da Semana
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nome do Dia'
+		dataType: string
+		lineageTag: 8ebc680f-a7f9-46b7-8de5-171caf2146e8
+		summarizeBy: none
+		sourceColumn: Nome do Dia
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column Mês/Ano
+		dataType: string
+		lineageTag: 56ed33b6-c9ed-47ca-9500-91fe32772f99
+		summarizeBy: none
+		sourceColumn: Mês/Ano
+		sortByColumn: 'Inicio Mes'
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column 'Contador MesAno'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6d8c8e84-52f1-4b89-ac68-7a7b3b8f16da
+		summarizeBy: sum
+		sourceColumn: Contador MesAno
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnoMes
+		dataType: int64
+		formatString: 0
+		lineageTag: ab671dce-92f0-4d42-80c8-daf00ea6d6df
+		summarizeBy: sum
+		sourceColumn: AnoMes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Feriado
+		dataType: string
+		lineageTag: 2d0d820f-588b-466e-9b5b-ad1029de0a9d
+		summarizeBy: none
+		sourceColumn: Feriado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column 'Dia Útil'
+		dataType: string
+		lineageTag: b5f707dd-828f-4c35-80be-8b20ab4b81ca
+		summarizeBy: none
+		sourceColumn: Dia Útil
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column PossuiDados = dCalendario[Data] <= MAX(fVendas[Data Venda])
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 12949731-fa29-420e-9eaf-e843406fccf0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Mês Abrev.'
+		dataType: string
+		lineageTag: f033150d-865c-44d2-b9e1-dad5a0817f62
+		summarizeBy: none
+		sourceColumn: Mês Abrev.
+		sortByColumn: Mês
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isText":true}
+
+	column 'Inicio Mes' = STARTOFMONTH(dCalendario[Data])
+		formatString: General Date
+		lineageTag: 3cf69eba-633a-4a70-8b0f-df56bad8587c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Data Completa'
+		lineageTag: c09e6529-2262-4461-958f-6ad6726372da
+
+		level Ano
+			lineageTag: 8c91dec8-0d56-491b-a2e0-1162cf536408
+			column: Ano
+
+		level 'Mês Abrev.'
+			lineageTag: ed377f02-1449-45d0-80b0-5de0a29264cd
+			column: 'Mês Abrev.'
+
+		level Dia
+			lineageTag: 6b6ddd2c-da93-4954-ba45-ca464d9e9f99
+			column: Dia
+
+	partition dCalendario-f8435047-709a-455f-bd03-4e628ff7c0f5 = m
+		mode: import
+		queryGroup: Dimensões
+		source =
+				let
+				    DataVendaMin = List.Min(fVendas[Data Venda]),
+				    DataVendaMax = List.Max(fVendas[Data Venda]),
+				    DataInicial = Date.StartOfYear(DataVendaMin),
+				    DataFinal = Date.EndOfYear(DataVendaMax),
+				    Duracao = Duration.Days(DataFinal - DataInicial) + 1,
+				    Fonte = List.Dates( DataInicial, Duracao, #duration(1, 0, 0, 0)),
+				    #"Convertido para Tabela" = Table.FromList(Fonte, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"Convertido para Tabela",{{"Column1", "Data"}}),
+				    #"Ano Inserido" = Table.AddColumn(#"Colunas Renomeadas", "Ano", each Date.Year([Data]), Int64.Type),
+				    #"Mês Inserido" = Table.AddColumn(#"Ano Inserido", "Mês", each Date.Month([Data]), Int64.Type),
+				    #"Nome do Mês Inserido" = Table.AddColumn(#"Mês Inserido", "Nome do Mês", each Date.MonthName([Data]), type text),
+				    #"Dia Inserido" = Table.AddColumn(#"Nome do Mês Inserido", "Dia", each Date.Day([Data]), Int64.Type),
+				    #"Dia da Semana Inserido" = Table.AddColumn(#"Dia Inserido", "Dia da Semana", each Date.DayOfWeek([Data]), Int64.Type),
+				    #"Nome do Dia Inserido" = Table.AddColumn(#"Dia da Semana Inserido", "Nome do Dia", each Date.DayOfWeekName([Data]), type text),
+				    #"Coluna Personalizada Adicionada" = Table.AddColumn(#"Nome do Dia Inserido", "Mês/Ano", each Text.Combine({Text.Start([Nome do Mês], 3), "/", Text.From([Ano], "pt-BR")}), type text),
+				    #"Personalização Adicionada" = Table.AddColumn(#"Coluna Personalizada Adicionada", "Contador MesAno", each ([Ano] - 2017) * 12 + [Mês]),
+				    #"Personalização Adicionada1" = Table.AddColumn(#"Personalização Adicionada", "AnoMes", each [Ano] * 100 + [Mês]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Personalização Adicionada1",{{"Contador MesAno", Int64.Type}, {"AnoMes", Int64.Type}, {"Data", type date}}),
+				    #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado", {"Data"}, dFeriado, {"Data"}, "dFeriado", JoinKind.LeftOuter),
+				    #"dFeriado Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "dFeriado", {"Feriado"}, {"Feriado"}),
+				    #"Colunas Reordenadas" = Table.ReorderColumns(#"dFeriado Expandido",{"Data", "Ano", "Mês", "Nome do Mês", "Dia", "Mês/Ano", "Contador MesAno", "AnoMes", "Dia da Semana", "Nome do Dia", "Feriado"}),
+				    #"Coluna Condicional Adicionada" = Table.AddColumn(#"Colunas Reordenadas", "Dia Útil", each if [Dia da Semana] = 0 then "Não" else if [Dia da Semana] = 6 then "Não" else if [Feriado] <> null then "Não" else "Sim"),
+				    #"Tipo Alterado1" = Table.TransformColumnTypes(#"Coluna Condicional Adicionada",{{"Dia Útil", type text}}),
+				    #"Primeiros Caracteres Inseridos" = Table.AddColumn(#"Tipo Alterado1", "Mês Abrev.", each Text.Start([Nome do Mês], 3), type text)
+				in
+				    #"Primeiros Caracteres Inseridos"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
