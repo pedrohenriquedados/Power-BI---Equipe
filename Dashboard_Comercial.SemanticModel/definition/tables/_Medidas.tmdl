@@ -1,6 +1,34 @@
 table _Medidas
 	lineageTag: ee862beb-c68c-4119-92f0-13229c22c466
 
+	measure 'Total Faturamento' =
+			
+			SUM(fVendas[Valor Venda])
+		lineageTag: 4ad36d27-29e2-40cb-8b31-c5f6b6aa1d08
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Qtd Novos Clientes' =
+			
+			VAR vMenorMes = MIN(dCalendario[Data])
+			VAR vMaiorMes = MAX(dCalendario[Data])
+			
+			VAR vTabela =
+			FILTER(
+			    VALUES(dCliente[ID Cliente]),
+			    VAR vPrimeiraCompra =
+			    CALCULATE(
+			        MIN(fVendas[Data Venda]),
+			        ALL(dCalendario)
+			    )
+			    RETURN
+			    vPrimeiraCompra >= vMenorMes && vPrimeiraCompra <= vMaiorMes
+			)
+			RETURN
+			COUNTROWS(vTabela)
+		formatString: 0
+		lineageTag: e434f5db-772a-4ebc-822b-f78781c7f912
+
 	column Value
 		formatString: 0
 		lineageTag: cf679cf6-5b37-4e21-bb4c-dfd292ca13ca
