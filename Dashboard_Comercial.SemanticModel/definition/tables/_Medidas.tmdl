@@ -29,6 +29,20 @@ table _Medidas
 		formatString: 0
 		lineageTag: e434f5db-772a-4ebc-822b-f78781c7f912
 
+	measure 'Total Custo' = SUM(fVendas[Custo Venda])
+		lineageTag: b123da74-e069-4320-99ee-76bedfe99cce
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Lucro = [Total Faturamento] - [Total Custo]
+		lineageTag: 2dcfa65a-f176-46cd-8e4f-8259a7726b03
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Quantidade Cliente' = DISTINCTCOUNT(fVendas[ID Cliente])
+		formatString: 0
+		lineageTag: a983fd2b-d04b-4087-aee5-e3be6e15b745
+
 	column Value
 		formatString: 0
 		lineageTag: cf679cf6-5b37-4e21-bb4c-dfd292ca13ca
